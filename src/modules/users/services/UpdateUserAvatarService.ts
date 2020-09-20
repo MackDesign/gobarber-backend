@@ -1,24 +1,29 @@
-import { getRepository } from 'typeorm';
 import path from 'path';
 import fs from 'fs';
+import uploadConfig from '@config/upload';
+import { injectable, inject } from 'tsyringe';
 
-import uploadConfig from '../config/upload';
-import AppError from '../errors/AppError';
+import AppError from '@shared/errors/AppError';
+import IUsersRepository from '../repositories/IUsersRepository';
 
-import User from '../models/User';
+import User from '../infra/typeorm/entities/User';
 
-interface Request {
+interface IRequest {
   // eslint-disable-next-line camelcase
   user_id: string;
   avatarFilename: string;
 }
 
+@injectable()
 class UpdateUserAvatarService {
-  // eslint-disable-next-line camelcase
-  public async execute({ user_id, avatarFilename }: Request): Promise<User> {
-    const usersRepository = getRepository(User);
+  constructor(
+    @inject('UsersRepository')
+    private usersRepository: IUsersRepository, // eslint-disable-next-line no-empty-function
+  ) {}
 
-    const user = await usersRepository.findOne(user_id);
+  // eslint-disable-next-line camelcase
+  public async execute({ user_id, avatarFilename }: IRequest): Promise<User> {
+    const user = await this.usersRepository.findById(user_id);
 
     if (!user) {
       throw new AppError('Only authenticated users can change avatar.', 401);
@@ -37,7 +42,7 @@ class UpdateUserAvatarService {
 
     user.avatar = avatarFilename;
 
-    await usersRepository.save(user);
+    await this.usersRepository.save(user);
 
     return user;
   }
