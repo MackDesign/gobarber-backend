@@ -2,7 +2,7 @@ import { Router } from 'express';
 import multer from 'multer';
 import uploadConfig from '@config/upload';
 
-import ensureAthenticated from '@modules/users/infra/http/middlewares/ensureAthenticated';
+import ensureAuthenticated from '@modules/users/infra/http/middlewares/ensureAthenticated';
 import UsersController from '../controllers/UsersController';
 import UserAvatarController from '../controllers/UserAvatarController';
 
@@ -16,7 +16,7 @@ usersRouter.post('/', usersController.create);
 
 usersRouter.patch(
   '/avatar',
-  ensureAthenticated,
+  ensureAuthenticated,
   upload.single('avatar'),
   userAvatarController.update,
 );
